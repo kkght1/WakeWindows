@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Sleep Log" />
+<meta name="theme-color" content="#F6E7D5" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23403B6B'/%3E%3Cpath d='M118 96a34 34 0 1 1-34-44 28 28 0 0 0 34 44z' fill='%23F6E7D5'/%3E%3C/svg%3E" />
+<title>Sleep Log</title>
+<style>
+  :root{
+    --ink:#2E2A26; --soft:#7A7066; --line:#E9DECE; --card:#FFFDF9;
+    --amber:#C2773F; --amberSoft:#F6E7D5; --indigo:#403B6B; --indigoSoft:#E4E0F0;
+    --good:#5C7A5A; --warn:#B45C2E; --band:#EBE5D6;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    background:radial-gradient(120% 80% at 50% -10%, var(--amberSoft) 0%, #FBF6EE 55%, #F7EFE2 100%);
+    background-attachment:fixed;
+    padding:max(20px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:460px;margin:0 auto;}
+  .serif{font-family:Georgia,"Times New Roman",serif;font-weight:400;}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;}
+  .date{font-size:12px;color:var(--soft);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+  h1{font-family:Georgia,serif;font-size:30px;margin:2px 0 0;font-weight:400;}
+  .iconbtn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;color:var(--soft);cursor:pointer;font-size:16px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;}
+  .label{font-size:11px;color:var(--soft);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  .big{font-family:Georgia,serif;line-height:1.05;}
+  .row{display:flex;align-items:center;gap:10px;}
+  .between{display:flex;align-items:center;justify-content:space-between;}
+  input[type=time]{font-family:Georgia,serif;font-size:16px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;color:var(--ink);background:#fff;}
+  input[type=number]{font-size:15px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;text-align:right;color:var(--ink);background:#fff;width:72px;}
+  button{font-family:inherit;}
+  .btn{border:none;border-radius:12px;padding:13px 0;font-weight:700;font-size:15px;cursor:pointer;flex:1;display:flex;align-items:center;justify-content:center;gap:7px;}
+  .btn-indigo{background:var(--indigo);color:#fff;}
+  .btn-amber{background:var(--amber);color:#fff;}
+  .btn-ghost-indigo{background:transparent;color:var(--indigo);border:1px solid var(--indigo);}
+  .btn-ghost{background:transparent;color:var(--soft);border:1px solid var(--line);}
+  .now{background:var(--amber);color:#fff;border:none;border-radius:9px;padding:7px 12px;font-weight:600;font-size:12.5px;cursor:pointer;}
+  .now.dark{background:var(--indigo);}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 13px;flex:1;min-width:0;}
+  .barwrap{position:relative;height:14px;background:#F3ECDF;border-radius:999px;overflow:hidden;border:1px solid var(--line);}
+  .napbox{display:flex;align-items:center;gap:10px;padding:9px 10px;margin:6px 0;background:var(--indigoSoft);border-radius:12px;}
+  .ic{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+  .xbtn{background:transparent;border:none;color:var(--soft);cursor:pointer;font-size:18px;padding:4px 6px;line-height:1;}
+  .add{width:100%;background:transparent;border:1px dashed var(--line);color:var(--soft);border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;margin:4px 0 10px;}
+  .foot{text-align:center;font-size:11px;color:var(--soft);margin-top:4px;line-height:1.5;}
+  .hidden{display:none;}
+  .fieldrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin:0 3px 0 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <div class="date" id="dateLabel"></div>
+      <h1>Sleep log</h1>
+    </div>
+    <button class="iconbtn" id="gear">⚙︎</button>
+  </div>
+
+  <!-- LAST NIGHT -->
+  <div class="card">
+    <div class="label">Last night's sleep</div>
+    <div class="big" id="nightTotal" style="font-size:40px;color:var(--indigo);margin:4px 0 12px;">--</div>
+    <div class="between" style="gap:10px;flex-wrap:wrap;">
+      <div class="row" style="gap:8px;">
+        <span class="ic" style="background:var(--indigoSoft);">🌙</span>
+        <div>
+          <div class="label">Bedtime last night</div>
+          <input type="time" id="lastBed" />
+        </div>
+      </div>
+      <div class="row" style="gap:8px;">
+        <span class="ic" style="background:var(--amberSoft);">☀︎</span>
+        <div>
+          <div class="label">Wake this morning</div>
+          <input type="time" id="wake" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY SLEEP -->
+  <div class="card">
+    <div class="between" style="align-items:baseline;">
+      <span class="label">Day sleep total</span>
+      <span style="font-size:12px;color:var(--soft);" id="napCount"></span>
+    </div>
+    <div class="big" id="dayTotal" style="font-size:40px;color:var(--indigo);margin:4px 0 12px;">0m</div>
+    <div class="barwrap">
+      <div id="bandFill" style="position:absolute;top:0;bottom:0;background:var(--band);"></div>
+      <div id="dayFill" style="position:absolute;left:0;top:0;bottom:0;background:var(--indigo);transition:width .4s;"></div>
+    </div>
+    <div style="position:relative;height:16px;margin-top:3px;">
+      <span id="lowLabel" style="position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--soft);"></span>
+      <span id="highLabel" style="position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--soft);"></span>
+    </div>
+    <div id="budgetMsg" style="font-size:13px;font-weight:500;margin-top:4px;color:var(--soft);"></div>
+    <div id="combined" style="font-size:12px;color:var(--soft);margin-top:6px;"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="row" style="gap:10px;margin-bottom:14px;">
+    <div class="stat"><div class="label">Avg wake window</div><div class="big" id="avgWW" style="font-size:21px;color:var(--amber);margin-top:2px;">--</div></div>
+    <div class="stat"><div class="label">Time awake</div><div class="big" id="awake" style="font-size:21px;margin-top:2px;">--</div></div>
+    <div class="stat"><div class="label">Wake windows</div><div class="big" id="wwCount" style="font-size:21px;margin-top:2px;">0</div></div>
+  </div>
+
+  <!-- WAKE WINDOWS -->
+  <div class="card" id="wwCard">
+    <div class="label" style="margin-bottom:10px;">Wake windows today</div>
+    <div id="wwList"></div>
+  </div>
+
+  <!-- QUICK ACTIONS + LOG -->
+  <div class="card">
+    <div class="label" style="margin-bottom:12px;">Naps &amp; bedtime</div>
+    <div class="row" id="quick" style="gap:10px;margin-bottom:12px;"></div>
+    <div id="napList"></div>
+    <button class="add" id="addNap">＋ Add nap manually</button>
+    <div class="row" style="gap:10px;">
+      <span class="ic" style="background:var(--indigoSoft);">🛏︎</span>
+      <span style="flex:1;font-size:14px;font-weight:600;">Tonight's bedtime</span>
+      <input type="time" id="tonightBed" />
+      <button class="now dark" id="tonightNow">Now</button>
+    </div>
+    <button class="btn btn-ghost" id="newDay" style="margin-top:14px;flex:none;width:100%;">↺ Start a new day</button>
+  </div>
+
+  <!-- 7 DAY VIEW -->
+  <div class="card" id="weekCard">
+    <div class="between" style="margin-bottom:8px;">
+      <span class="label">Last 7 days</span>
+      <span style="font-size:11px;color:var(--soft);"><span class="dot" style="background:var(--indigo);"></span>night<span class="dot" style="background:var(--amber);"></span>day</span>
+    </div>
+    <div id="week"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card hidden" id="settings">
+    <div class="label" style="margin-bottom:10px;">Typical day-sleep range</div>
+    <div class="fieldrow"><span style="font-size:14px;">Lower (h)</span><input type="number" step="0.25" id="lowIn"></div>
+    <div class="fieldrow"><span style="font-size:14px;">Upper (h)</span><input type="number" step="0.25" id="highIn"></div>
+    <div style="font-size:11.5px;color:var(--soft);margin-top:8px;line-height:1.5;">The shaded band on the day-sleep bar. Adjust as you settle on the right total.</div>
+  </div>
+
+  <div class="foot">Saves on this device · wake windows are read off whatever you log</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /* ---------- storage (graceful if blocked) ---------- */
+  var mem=null;
+  function rawLoad(){ try{ return JSON.parse(localStorage.getItem("sleepLog")||"null"); }catch(e){ return mem; } }
+  function rawSave(s){ mem=s; try{ localStorage.setItem("sleepLog", JSON.stringify(s)); }catch(e){} }
+
+  /* ---------- helpers ---------- */
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function dateLabel(){ return new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}); }
+  function dayLabel(k){ var p=k.split("-"); var d=new Date(+p[0],+p[1]-1,+p[2]); return d.toLocaleDateString(undefined,{weekday:"short"})+" "+(+p[2]); }
+  function nowMin(){ var d=new Date(); return d.getHours()*60+d.getMinutes(); }
+  function fmt(min){
+    if(min==null||isNaN(min)) return "--";
+    var m=((Math.round(min)%1440)+1440)%1440, h=Math.floor(m/60), mm=m%60;
+    var ap=h<12?"AM":"PM", h12=h%12; if(h12===0) h12=12;
+    return h12+":"+pad(mm)+" "+ap;
+  }
+  function fmtDur(min){
+    if(min==null||isNaN(min)) return "0m";
+    var v=Math.round(min), h=Math.floor(Math.abs(v)/60), m=Math.abs(v)%60, s="";
+    if(h) s+=h+"h";
+    if(m||!h) s+=(h?" ":"")+m+"m";
+    return s;
+  }
+  function toHHMM(min){ if(min==null) return ""; var m=((Math.round(min)%1440)+1440)%1440; return pad(Math.floor(m/60))+":"+pad(m%60); }
+  function fromHHMM(s){ if(!s) return null; var p=s.split(":"); var h=+p[0],m=+p[1]; if(isNaN(h)||isNaN(m)) return null; return h*60+m; }
+
+  /* ---------- state ---------- */
+  var DEFAULT={ date:todayStr(), lastBed:null, wake:null, naps:[], tonightBed:null, low:150, high:180, history:{} };
+  var st = rawLoad() || JSON.parse(JSON.stringify(DEFAULT));
+  if(!st.history) st.history={};
+  if(st.low==null) st.low=150;
+  if(st.high==null) st.high=180;
+  // daily rollover: archive yesterday, carry tonight's bedtime into last night
+  if(st.date !== todayStr()){
+    archive(st);
+    var carry = st.tonightBed;
+    var hist = st.history, low=st.low, high=st.high;
+    st = { date:todayStr(), lastBed:(carry!=null?carry:null), wake:null, naps:[], tonightBed:null, low:low, high:high, history:hist };
+    rawSave(st);
+  }
+  function commit(){ rawSave(st); render(); }
+
+  /* ---------- derived (parameterised by a day object) ---------- */
+  function nightOf(day){ return (day.lastBed!=null && day.wake!=null) ? ((day.wake-day.lastBed)%1440+1440)%1440 : null; }
+  function daySleepOf(day){ var d=0; (day.naps||[]).forEach(function(n){ if(n.start!=null&&n.end!=null) d+=Math.max(0,n.end-n.start); }); return d; }
+  function windowsFor(day, nowVal){
+    var wins=[]; if(day.wake==null) return wins;
+    var prev=day.wake;
+    (day.naps||[]).forEach(function(n){
+      if(prev==null) return;
+      wins.push({from:prev,to:n.start,complete:n.start!=null});
+      prev=(n.end!=null)?n.end:null;
+    });
+    if(prev!=null) wins.push({from:prev,to:day.tonightBed,complete:day.tonightBed!=null});
+    return wins.map(function(w,i){
+      var dur = w.complete ? (w.to-w.from) : (nowVal!=null ? Math.max(0,nowVal-w.from) : null);
+      return {from:w.from,to:w.to,index:i+1,complete:w.complete,inProgress:!w.complete,dur:dur};
+    });
+  }
+  function summarize(day, nowVal){
+    var wins=windowsFor(day,nowVal);
+    var done=wins.filter(function(w){return w.complete;});
+    var avg=done.length? done.reduce(function(a,w){return a+w.dur;},0)/done.length : null;
+    return { night:nightOf(day), day:daySleepOf(day), avg:avg, ww:done.length };
+  }
+  function archive(day){
+    var meaningful=(day.wake!=null)||(day.lastBed!=null)||((day.naps||[]).length>0);
+    if(!meaningful) return;
+    day.history[day.date]=summarize(day,null);
+    var keys=Object.keys(day.history).sort();
+    while(keys.length>14){ delete day.history[keys.shift()]; }
+  }
+  function inProgressNap(){ for(var i=0;i<st.naps.length;i++){ if(st.naps[i].start!=null&&st.naps[i].end==null) return i; } return -1; }
+
+  /* ---------- render ---------- */
+  function pctOf(v,max){ return Math.max(0,Math.min(100,(v/max)*100)); }
+  function setVal(id,v){ var el=document.getElementById(id); if(el && document.activeElement!==el) el.value=v; }
+
+  function render(){
+    document.getElementById("dateLabel").textContent = dateLabel();
+    setVal("lastBed", toHHMM(st.lastBed));
+    setVal("wake", toHHMM(st.wake));
+    setVal("tonightBed", toHHMM(st.tonightBed));
+    setVal("lowIn", st.low/60);
+    setVal("highIn", st.high/60);
+
+    var nt=nightOf(st);
+    document.getElementById("nightTotal").textContent = nt!=null? fmtDur(nt):"--";
+
+    var ds=daySleepOf(st);
+    document.getElementById("dayTotal").textContent = fmtDur(ds);
+    var nappedCount = st.naps.filter(function(n){return n.start!=null;}).length;
+    document.getElementById("napCount").textContent = nappedCount+" nap"+(nappedCount===1?"":"s");
+
+    var max=Math.max(st.high, ds, 1);
+    document.getElementById("bandFill").style.left=pctOf(st.low,max)+"%";
+    document.getElementById("bandFill").style.width=(pctOf(st.high,max)-pctOf(st.low,max))+"%";
+    var df=document.getElementById("dayFill");
+    df.style.width=pctOf(ds,max)+"%";
+    df.style.background= ds>st.high ? "var(--warn)":"var(--indigo)";
+    var low=document.getElementById("lowLabel"), high=document.getElementById("highLabel");
+    low.style.left=pctOf(st.low,max)+"%"; low.textContent=fmtDur(st.low);
+    high.style.left=pctOf(st.high,max)+"%"; high.textContent=fmtDur(st.high);
+
+    var bm=document.getElementById("budgetMsg");
+    if(ds<st.low){ bm.textContent=fmtDur(st.low-ds)+"–"+fmtDur(st.high-ds)+" more to reach the "+fmtDur(st.low)+"–"+fmtDur(st.high)+" range"; bm.style.color="var(--soft)"; }
+    else if(ds<=st.high){ bm.textContent="In typical range · up to "+fmtDur(st.high-ds)+" left to "+fmtDur(st.high); bm.style.color="var(--good)"; }
+    else { bm.textContent=fmtDur(ds-st.high)+" over "+fmtDur(st.high); bm.style.color="var(--warn)"; }
+
+    document.getElementById("combined").textContent = (nt!=null)? "Last night + day so far = "+fmtDur(nt+ds) : "";
+
+    var wins=windowsFor(st, nowMin());
+    var done=wins.filter(function(w){return w.complete;});
+    var avg=done.length? done.reduce(function(a,w){return a+w.dur;},0)/done.length : null;
+    var totalAwake=wins.reduce(function(a,w){return a+(w.dur||0);},0);
+    document.getElementById("avgWW").textContent = avg!=null? fmtDur(avg):"--";
+    document.getElementById("awake").textContent = wins.length? fmtDur(totalAwake):"--";
+    document.getElementById("wwCount").textContent = done.length || (wins.length?1:0);
+
+    var wl=document.getElementById("wwList");
+    document.getElementById("wwCard").style.display = wins.length? "block":"none";
+    wl.innerHTML="";
+    wins.forEach(function(w,i){
+      var row=document.createElement("div");
+      row.className="row"; row.style.padding="9px 0";
+      row.style.borderBottom=(i<wins.length-1)?"1px solid var(--line)":"none";
+      row.innerHTML=
+        '<div class="ic" style="width:26px;height:26px;border-radius:8px;font-size:13px;font-weight:700;'
+        +(w.inProgress?'background:var(--amber);color:#fff;':'background:var(--amberSoft);color:var(--amber);')+'">'+w.index+'</div>'
+        +'<div style="flex:1;font-size:13.5px;color:var(--soft);">'+fmt(w.from)+' <span style="opacity:.5">→</span> '
+        +(w.inProgress?'<span style="color:var(--amber);font-weight:600;">now</span>':fmt(w.to))+'</div>'
+        +'<div class="big" style="font-size:18px;'+(w.inProgress?'color:var(--amber);':'')+'" '+(w.inProgress?'id="liveww"':'')+'>'+fmtDur(w.dur)+'</div>';
+      wl.appendChild(row);
+    });
+
+    var q=document.getElementById("quick"); q.innerHTML="";
+    var ip=inProgressNap();
+    if(st.wake==null){
+      q.innerHTML='<div style="font-size:13px;color:var(--soft);">Enter this morning\u2019s wake time above to begin.</div>';
+    } else if(ip!==-1){
+      q.innerHTML='<button class="btn btn-amber" id="upNow">☀︎ Woke up</button>';
+      document.getElementById("upNow").onclick=function(){ st.naps[ip].end=nowMin(); commit(); };
+    } else if(st.tonightBed!=null){
+      q.innerHTML='<div style="font-size:13px;color:var(--soft);">Day closed at '+fmt(st.tonightBed)+'. Tap “Start a new day” tomorrow.</div>';
+    } else {
+      q.innerHTML='<button class="btn btn-indigo" id="downNow">🌙 Down for nap</button>'
+                +'<button class="btn btn-ghost-indigo" id="bedNow">🛏︎ Bedtime</button>';
+      document.getElementById("downNow").onclick=function(){ st.naps.push({start:nowMin(),end:null}); commit(); };
+      document.getElementById("bedNow").onclick=function(){ st.tonightBed=nowMin(); commit(); };
+    }
+
+    var nlist=document.getElementById("napList"); nlist.innerHTML="";
+    st.naps.forEach(function(n,i){
+      var box=document.createElement("div"); box.className="napbox";
+      var dur=(n.start!=null&&n.end!=null)?' · '+fmtDur(n.end-n.start):(n.start!=null&&n.end==null)?' · napping…':'';
+      box.innerHTML=
+        '<span class="ic" style="background:#fff;">🌙</span>'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:12.5px;font-weight:600;">Nap '+(i+1)+'<span style="color:var(--soft);font-weight:400;">'+dur+'</span></div>'
+        +'<div class="row" style="gap:6px;margin-top:4px;">'
+        +'<input type="time" data-nap="'+i+'" data-f="start" value="'+toHHMM(n.start)+'" style="font-size:13px;padding:3px 6px;">'
+        +'<span style="color:var(--soft);font-size:12px;">→</span>'
+        +'<input type="time" data-nap="'+i+'" data-f="end" value="'+toHHMM(n.end)+'" style="font-size:13px;padding:3px 6px;">'
+        +'</div></div>'
+        +'<button class="xbtn" data-del="'+i+'">×</button>';
+      nlist.appendChild(box);
+    });
+    nlist.querySelectorAll('input[type=time]').forEach(function(inp){
+      inp.onchange=function(){ var i=+inp.getAttribute("data-nap"), f=inp.getAttribute("data-f"); st.naps[i][f]=fromHHMM(inp.value); commit(); };
+    });
+    nlist.querySelectorAll('[data-del]').forEach(function(b){
+      b.onclick=function(){ st.naps.splice(+b.getAttribute("data-del"),1); commit(); };
+    });
+
+    render7();
+  }
+
+  function render7(){
+    var rows=[{key:todayStr(),label:"Today",s:summarize(st,nowMin())}];
+    var hk=Object.keys(st.history).sort().reverse();
+    for(var i=0;i<hk.length && rows.length<7;i++){
+      if(hk[i]===todayStr()) continue;
+      rows.push({key:hk[i],label:dayLabel(hk[i]),s:st.history[hk[i]]});
+    }
+    var scale=840; // 14h reference
+    rows.forEach(function(r){ scale=Math.max(scale,(r.s.night||0)+(r.s.day||0)); });
+    var html="";
+    rows.forEach(function(r){
+      var n=r.s.night, d=r.s.day, total=(n||0)+(d||0);
+      var pn=pctOf(n||0,scale), pd=pctOf(d||0,scale);
+      var cap=(n!=null?fmtDur(n)+" night":"no night")+" · "+fmtDur(d)+" day"+(r.s.avg!=null?" · "+fmtDur(r.s.avg)+" WW":"");
+      html+=
+        '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);">'
+        +'<div style="width:48px;font-size:12.5px;font-weight:600;color:'+(r.label==="Today"?"var(--ink)":"var(--soft)")+';">'+r.label+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="display:flex;height:10px;border-radius:999px;overflow:hidden;background:#F3ECDF;">'
+            +'<div style="width:'+pn+'%;background:var(--indigo);"></div>'
+            +'<div style="width:'+pd+'%;background:var(--amber);"></div>'
+          +'</div>'
+          +'<div style="font-size:11px;color:var(--soft);margin-top:3px;">'+cap+'</div>'
+        +'</div>'
+        +'<div class="big" style="font-size:16px;width:56px;text-align:right;">'+fmtDur(total)+'</div>'
+        +'</div>';
+    });
+    document.getElementById("week").innerHTML=html;
+  }
+
+  /* ---------- top-level listeners ---------- */
+  document.getElementById("lastBed").onchange=function(e){ st.lastBed=fromHHMM(e.target.value); commit(); };
+  document.getElementById("wake").onchange=function(e){ st.wake=fromHHMM(e.target.value); commit(); };
+  document.getElementById("tonightBed").onchange=function(e){ st.tonightBed=fromHHMM(e.target.value); commit(); };
+  document.getElementById("tonightNow").onclick=function(){ st.tonightBed=nowMin(); commit(); };
+  document.getElementById("addNap").onclick=function(){ st.naps.push({start:null,end:null}); commit(); };
+  document.getElementById("newDay").onclick=function(){
+    if(!confirm("Start a new day? Today's totals will be saved to the last-7-days view, and tonight's bedtime carries over as last night.")) return;
+    archive(st);
+    st={ date:todayStr(), lastBed:(st.tonightBed!=null?st.tonightBed:st.lastBed), wake:null, naps:[], tonightBed:null, low:st.low, high:st.high, history:st.history };
+    commit();
+  };
+  document.getElementById("gear").onclick=function(){ document.getElementById("settings").classList.toggle("hidden"); };
+  document.getElementById("lowIn").onchange=function(e){ st.low=(parseFloat(e.target.value)||0)*60; commit(); };
+  document.getElementById("highIn").onchange=function(e){ st.high=(parseFloat(e.target.value)||0)*60; commit(); };
+
+  /* live tick: just the in-progress wake window number */
+  setInterval(function(){
+    var el=document.getElementById("liveww");
+    if(el){ var wins=windowsFor(st,nowMin()); var w=wins[wins.length-1]; if(w&&w.inProgress) el.textContent=fmtDur(w.dur); }
+  }, 30000);
+
+  render();
+})();
+</script>
+</body>
+</html>
