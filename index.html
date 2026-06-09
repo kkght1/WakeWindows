@@ -24,18 +24,16 @@
     padding:max(20px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
   }
   .wrap{max-width:460px;margin:0 auto;}
-  .serif{font-family:Georgia,"Times New Roman",serif;font-weight:400;}
-  .head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;}
+  .head{margin-bottom:16px;}
   .date{font-size:12px;color:var(--soft);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
   h1{font-family:Georgia,serif;font-size:30px;margin:2px 0 0;font-weight:400;}
-  .iconbtn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;color:var(--soft);cursor:pointer;font-size:16px;}
   .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;}
   .label{font-size:11px;color:var(--soft);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
-  .big{font-family:Georgia,serif;line-height:1.05;}
+  .big{font-family:Georgia,serif;line-height:1.05;font-weight:400;}
   .row{display:flex;align-items:center;gap:10px;}
   .between{display:flex;align-items:center;justify-content:space-between;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
   input[type=time]{font-family:Georgia,serif;font-size:16px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;color:var(--ink);background:#fff;}
-  input[type=number]{font-size:15px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;text-align:right;color:var(--ink);background:#fff;width:72px;}
   button{font-family:inherit;}
   .btn{border:none;border-radius:12px;padding:13px 0;font-weight:700;font-size:15px;cursor:pointer;flex:1;display:flex;align-items:center;justify-content:center;gap:7px;}
   .btn-indigo{background:var(--indigo);color:#fff;}
@@ -44,26 +42,20 @@
   .btn-ghost{background:transparent;color:var(--soft);border:1px solid var(--line);}
   .now{background:var(--amber);color:#fff;border:none;border-radius:9px;padding:7px 12px;font-weight:600;font-size:12.5px;cursor:pointer;}
   .now.dark{background:var(--indigo);}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 13px;flex:1;min-width:0;}
-  .barwrap{position:relative;height:14px;background:#F3ECDF;border-radius:999px;overflow:hidden;border:1px solid var(--line);}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 13px;min-width:0;}
   .napbox{display:flex;align-items:center;gap:10px;padding:9px 10px;margin:6px 0;background:var(--indigoSoft);border-radius:12px;}
   .ic{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
   .xbtn{background:transparent;border:none;color:var(--soft);cursor:pointer;font-size:18px;padding:4px 6px;line-height:1;}
   .add{width:100%;background:transparent;border:1px dashed var(--line);color:var(--soft);border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;margin:4px 0 10px;}
   .foot{text-align:center;font-size:11px;color:var(--soft);margin-top:4px;line-height:1.5;}
-  .hidden{display:none;}
-  .fieldrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);}
   .dot{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin:0 3px 0 8px;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="head">
-    <div>
-      <div class="date" id="dateLabel"></div>
-      <h1>Sleep log</h1>
-    </div>
-    <button class="iconbtn" id="gear">⚙︎</button>
+    <div class="date" id="dateLabel"></div>
+    <h1>Sleep log</h1>
   </div>
 
   <!-- LAST NIGHT -->
@@ -88,27 +80,9 @@
     </div>
   </div>
 
-  <!-- DAY SLEEP -->
-  <div class="card">
-    <div class="between" style="align-items:baseline;">
-      <span class="label">Day sleep total</span>
-      <span style="font-size:12px;color:var(--soft);" id="napCount"></span>
-    </div>
-    <div class="big" id="dayTotal" style="font-size:40px;color:var(--indigo);margin:4px 0 12px;">0m</div>
-    <div class="barwrap">
-      <div id="bandFill" style="position:absolute;top:0;bottom:0;background:var(--band);"></div>
-      <div id="dayFill" style="position:absolute;left:0;top:0;bottom:0;background:var(--indigo);transition:width .4s;"></div>
-    </div>
-    <div style="position:relative;height:16px;margin-top:3px;">
-      <span id="lowLabel" style="position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--soft);"></span>
-      <span id="highLabel" style="position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--soft);"></span>
-    </div>
-    <div id="budgetMsg" style="font-size:13px;font-weight:500;margin-top:4px;color:var(--soft);"></div>
-    <div id="combined" style="font-size:12px;color:var(--soft);margin-top:6px;"></div>
-  </div>
-
-  <!-- STATS -->
-  <div class="row" style="gap:10px;margin-bottom:14px;">
+  <!-- STATS (2x2) -->
+  <div class="grid">
+    <div class="stat"><div class="label">Day sleep</div><div class="big" id="dayTotal" style="font-size:21px;color:var(--indigo);margin-top:2px;">0m</div></div>
     <div class="stat"><div class="label">Avg wake window</div><div class="big" id="avgWW" style="font-size:21px;color:var(--amber);margin-top:2px;">--</div></div>
     <div class="stat"><div class="label">Time awake</div><div class="big" id="awake" style="font-size:21px;margin-top:2px;">--</div></div>
     <div class="stat"><div class="label">Wake windows</div><div class="big" id="wwCount" style="font-size:21px;margin-top:2px;">0</div></div>
@@ -144,26 +118,16 @@
     <div id="week"></div>
   </div>
 
-  <!-- SETTINGS -->
-  <div class="card hidden" id="settings">
-    <div class="label" style="margin-bottom:10px;">Typical day-sleep range</div>
-    <div class="fieldrow"><span style="font-size:14px;">Lower (h)</span><input type="number" step="0.25" id="lowIn"></div>
-    <div class="fieldrow"><span style="font-size:14px;">Upper (h)</span><input type="number" step="0.25" id="highIn"></div>
-    <div style="font-size:11.5px;color:var(--soft);margin-top:8px;line-height:1.5;">The shaded band on the day-sleep bar. Adjust as you settle on the right total.</div>
-  </div>
-
   <div class="foot">Saves on this device · wake windows are read off whatever you log</div>
 </div>
 
 <script>
 (function(){
   "use strict";
-  /* ---------- storage (graceful if blocked) ---------- */
   var mem=null;
   function rawLoad(){ try{ return JSON.parse(localStorage.getItem("sleepLog")||"null"); }catch(e){ return mem; } }
   function rawSave(s){ mem=s; try{ localStorage.setItem("sleepLog", JSON.stringify(s)); }catch(e){} }
 
-  /* ---------- helpers ---------- */
   function pad(n){ return String(n).padStart(2,"0"); }
   function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
   function dateLabel(){ return new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}); }
@@ -185,23 +149,17 @@
   function toHHMM(min){ if(min==null) return ""; var m=((Math.round(min)%1440)+1440)%1440; return pad(Math.floor(m/60))+":"+pad(m%60); }
   function fromHHMM(s){ if(!s) return null; var p=s.split(":"); var h=+p[0],m=+p[1]; if(isNaN(h)||isNaN(m)) return null; return h*60+m; }
 
-  /* ---------- state ---------- */
-  var DEFAULT={ date:todayStr(), lastBed:null, wake:null, naps:[], tonightBed:null, low:150, high:180, history:{} };
+  var DEFAULT={ date:todayStr(), lastBed:null, wake:null, naps:[], tonightBed:null, history:{} };
   var st = rawLoad() || JSON.parse(JSON.stringify(DEFAULT));
   if(!st.history) st.history={};
-  if(st.low==null) st.low=150;
-  if(st.high==null) st.high=180;
-  // daily rollover: archive yesterday, carry tonight's bedtime into last night
   if(st.date !== todayStr()){
     archive(st);
-    var carry = st.tonightBed;
-    var hist = st.history, low=st.low, high=st.high;
-    st = { date:todayStr(), lastBed:(carry!=null?carry:null), wake:null, naps:[], tonightBed:null, low:low, high:high, history:hist };
+    var carry=st.tonightBed, hist=st.history;
+    st={ date:todayStr(), lastBed:(carry!=null?carry:null), wake:null, naps:[], tonightBed:null, history:hist };
     rawSave(st);
   }
   function commit(){ rawSave(st); render(); }
 
-  /* ---------- derived (parameterised by a day object) ---------- */
   function nightOf(day){ return (day.lastBed!=null && day.wake!=null) ? ((day.wake-day.lastBed)%1440+1440)%1440 : null; }
   function daySleepOf(day){ var d=0; (day.naps||[]).forEach(function(n){ if(n.start!=null&&n.end!=null) d+=Math.max(0,n.end-n.start); }); return d; }
   function windowsFor(day, nowVal){
@@ -222,7 +180,8 @@
     var wins=windowsFor(day,nowVal);
     var done=wins.filter(function(w){return w.complete;});
     var avg=done.length? done.reduce(function(a,w){return a+w.dur;},0)/done.length : null;
-    return { night:nightOf(day), day:daySleepOf(day), avg:avg, ww:done.length };
+    var awake=wins.reduce(function(a,w){return a+(w.dur||0);},0);
+    return { night:nightOf(day), day:daySleepOf(day), avg:avg, ww:done.length, awake:awake };
   }
   function archive(day){
     var meaningful=(day.wake!=null)||(day.lastBed!=null)||((day.naps||[]).length>0);
@@ -233,42 +192,18 @@
   }
   function inProgressNap(){ for(var i=0;i<st.naps.length;i++){ if(st.naps[i].start!=null&&st.naps[i].end==null) return i; } return -1; }
 
-  /* ---------- render ---------- */
-  function pctOf(v,max){ return Math.max(0,Math.min(100,(v/max)*100)); }
   function setVal(id,v){ var el=document.getElementById(id); if(el && document.activeElement!==el) el.value=v; }
+  function pctOf(v,max){ return Math.max(0,Math.min(100,(v/max)*100)); }
 
   function render(){
     document.getElementById("dateLabel").textContent = dateLabel();
     setVal("lastBed", toHHMM(st.lastBed));
     setVal("wake", toHHMM(st.wake));
     setVal("tonightBed", toHHMM(st.tonightBed));
-    setVal("lowIn", st.low/60);
-    setVal("highIn", st.high/60);
 
     var nt=nightOf(st);
     document.getElementById("nightTotal").textContent = nt!=null? fmtDur(nt):"--";
-
-    var ds=daySleepOf(st);
-    document.getElementById("dayTotal").textContent = fmtDur(ds);
-    var nappedCount = st.naps.filter(function(n){return n.start!=null;}).length;
-    document.getElementById("napCount").textContent = nappedCount+" nap"+(nappedCount===1?"":"s");
-
-    var max=Math.max(st.high, ds, 1);
-    document.getElementById("bandFill").style.left=pctOf(st.low,max)+"%";
-    document.getElementById("bandFill").style.width=(pctOf(st.high,max)-pctOf(st.low,max))+"%";
-    var df=document.getElementById("dayFill");
-    df.style.width=pctOf(ds,max)+"%";
-    df.style.background= ds>st.high ? "var(--warn)":"var(--indigo)";
-    var low=document.getElementById("lowLabel"), high=document.getElementById("highLabel");
-    low.style.left=pctOf(st.low,max)+"%"; low.textContent=fmtDur(st.low);
-    high.style.left=pctOf(st.high,max)+"%"; high.textContent=fmtDur(st.high);
-
-    var bm=document.getElementById("budgetMsg");
-    if(ds<st.low){ bm.textContent=fmtDur(st.low-ds)+"–"+fmtDur(st.high-ds)+" more to reach the "+fmtDur(st.low)+"–"+fmtDur(st.high)+" range"; bm.style.color="var(--soft)"; }
-    else if(ds<=st.high){ bm.textContent="In typical range · up to "+fmtDur(st.high-ds)+" left to "+fmtDur(st.high); bm.style.color="var(--good)"; }
-    else { bm.textContent=fmtDur(ds-st.high)+" over "+fmtDur(st.high); bm.style.color="var(--warn)"; }
-
-    document.getElementById("combined").textContent = (nt!=null)? "Last night + day so far = "+fmtDur(nt+ds) : "";
+    document.getElementById("dayTotal").textContent = fmtDur(daySleepOf(st));
 
     var wins=windowsFor(st, nowMin());
     var done=wins.filter(function(w){return w.complete;});
@@ -343,13 +278,13 @@
       if(hk[i]===todayStr()) continue;
       rows.push({key:hk[i],label:dayLabel(hk[i]),s:st.history[hk[i]]});
     }
-    var scale=840; // 14h reference
+    var scale=840;
     rows.forEach(function(r){ scale=Math.max(scale,(r.s.night||0)+(r.s.day||0)); });
     var html="";
     rows.forEach(function(r){
-      var n=r.s.night, d=r.s.day, total=(n||0)+(d||0);
+      var n=r.s.night, d=r.s.day, aw=r.s.awake, total=(n||0)+(d||0);
       var pn=pctOf(n||0,scale), pd=pctOf(d||0,scale);
-      var cap=(n!=null?fmtDur(n)+" night":"no night")+" · "+fmtDur(d)+" day"+(r.s.avg!=null?" · "+fmtDur(r.s.avg)+" WW":"");
+      var cap=(n!=null?fmtDur(n):"—")+" night · "+fmtDur(d)+" day · "+(aw!=null?fmtDur(aw):"—")+" awake";
       html+=
         '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);">'
         +'<div style="width:48px;font-size:12.5px;font-weight:600;color:'+(r.label==="Today"?"var(--ink)":"var(--soft)")+';">'+r.label+'</div>'
@@ -366,7 +301,6 @@
     document.getElementById("week").innerHTML=html;
   }
 
-  /* ---------- top-level listeners ---------- */
   document.getElementById("lastBed").onchange=function(e){ st.lastBed=fromHHMM(e.target.value); commit(); };
   document.getElementById("wake").onchange=function(e){ st.wake=fromHHMM(e.target.value); commit(); };
   document.getElementById("tonightBed").onchange=function(e){ st.tonightBed=fromHHMM(e.target.value); commit(); };
@@ -375,14 +309,10 @@
   document.getElementById("newDay").onclick=function(){
     if(!confirm("Start a new day? Today's totals will be saved to the last-7-days view, and tonight's bedtime carries over as last night.")) return;
     archive(st);
-    st={ date:todayStr(), lastBed:(st.tonightBed!=null?st.tonightBed:st.lastBed), wake:null, naps:[], tonightBed:null, low:st.low, high:st.high, history:st.history };
+    st={ date:todayStr(), lastBed:(st.tonightBed!=null?st.tonightBed:st.lastBed), wake:null, naps:[], tonightBed:null, history:st.history };
     commit();
   };
-  document.getElementById("gear").onclick=function(){ document.getElementById("settings").classList.toggle("hidden"); };
-  document.getElementById("lowIn").onchange=function(e){ st.low=(parseFloat(e.target.value)||0)*60; commit(); };
-  document.getElementById("highIn").onchange=function(e){ st.high=(parseFloat(e.target.value)||0)*60; commit(); };
 
-  /* live tick: just the in-progress wake window number */
   setInterval(function(){
     var el=document.getElementById("liveww");
     if(el){ var wins=windowsFor(st,nowMin()); var w=wins[wins.length-1]; if(w&&w.inProgress) el.textContent=fmtDur(w.dur); }
